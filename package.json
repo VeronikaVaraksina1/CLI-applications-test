@@ -4,17 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "web-dev-server --node-resolve -open --watch",
+    "start:dev": "nodemon app",
+    "start": "node bookshelf.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Veronika Varaksina <plaguemoon@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "@web/dev-server": "^0.4.4"
+    "nodemon": "^3.1.0"
   },
   "dependencies": {
     "colors": "^1.4.0",
-    "commander": "^12.0.0"
+    "commander": "^12.0.0",
+    "yargs": "^17.7.2"
   }
 }
