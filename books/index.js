@@ -1,57 +1,71 @@
-const fs = require('node:fs/promises'); // fs/promises
+const fs = require("node:fs/promises"); // fs/promises
+const crypto = require("node:crypto");
 
-const path = require('node:path'); // path
-const filePath = path.resolve('books', 'books.json'); // const filePath = path.join(__dirname, 'books.json');
+const path = require("node:path"); // path
+const filePath = path.resolve("books", "books.json"); // const filePath = path.join(__dirname, 'books.json');
 
-const getBooks = async () => {
-    try {
-        const books = await fs.readFile(filePath, {encoding: 'utf-8'});
-        return JSON.parse(books);
-    } catch (error) {
-        return error.message;   
-    }
+const readBooks = async () => {
+  const books = await fs.readFile(filePath, { encoding: "utf-8" });
+  return JSON.parse(books); // інакше console.log(books) поверне json
 };
 
+const writeBooks = (books) => {
+  return fs.writeFile(filePath, JSON.stringify(books, null, 2));
+};
+
+const getBooks = async () => {
+  const books = await readBooks();
+  return books;
+};
+
+// ===================
+
 const getBook = async (id) => {
-    const books = await getBooks();
-    const result = books.find(book => book.id === id);
-    return result || null;
-}
+  const books = await readBooks();
+  const book = books.find((book) => book.id === id);
+  return book || null; // або явна умова: if (book === 'undefined') null; return book
+};
 
 const addBook = async (data) => {
-    const books = await getBooks();
-    const newBook = {id: new Date(), ...data};
-    books.push(newBook);
-    fs.writeFile(filePath, JSON.stringify(books, null, 2));
-    return newBook;
-}
+  const books = await readBooks();
+  const newBook = { id: crypto.randomUUID(), ...data };
+  books.push(newBook);
+  await writeBooks(books);
+  return newBook;
+};
 
 const deleteBook = async (id) => {
-    const books = await getBooks();
-    const index = books.findIndex(book => book.id === id);
-    if (index === -1) {
-        return null;
-    }
-    const [result] = books.splice(index, 1);
-    fs.writeFile(filePath, JSON.stringify(books, null, 2));
-    return result;
-}
+  const books = await readBooks();
+  const index = books.findIndex((book) => book.id === id);
+  
+  if (index === -1) {
+    return null;
+  }
+
+  const deletedBook = books[index];
+  books.splice(index, 1);
+  await writeBooks(books);
+  return deletedBook;
+};
 
 const updateBook = async (id, data) => {
-    const books = await getBooks();
-    const index = books.findIndex(book => book.id === id);
-    if (index === -1) {
-        return null;
-    }
-    books[index] = {id, ...data}
-    fs.writeFile(filePath, JSON.stringify(books, null, 2));
-    return books[index];
-}
+  const books = await readBooks();
+  const index = books.findIndex((book) => book.id === id);
+
+  if (index === -1) {
+    return null;
+  }
+
+  const updatedBook = { id, ...data };
+  books[index] = updatedBook;
+  await writeBooks(books);
+  return updatedBook;
+};
 
 module.exports = {
-    getBooks,
-    getBook,
-    addBook,
-    deleteBook,
-    updateBook,
-}
+  getBooks,
+  getBook,
+  addBook,
+  deleteBook,
+  updateBook,
+};
